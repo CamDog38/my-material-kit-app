@@ -1,0 +1,47 @@
+// pages/index.js
+import { useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
+import Link from 'next/link';
+
+export default function Home() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching posts:', error);
+    } else {
+      setPosts(data);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Posts</h1>
+      <Link href="/auth">
+        <a>Go to Auth Page</a>
+      </Link>
+      {posts.length > 0 ? (
+        <ul>
+          {posts.map((post) => (
+            <li key={post.id}>
+              <h2>{post.title}</h2>
+              <p>{post.content}</p>
+              <small>{new Date(post.created_at).toLocaleString()}</small>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No posts available.</p>
+      )}
+    </div>
+  );
+}
